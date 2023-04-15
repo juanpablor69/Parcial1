@@ -5,6 +5,7 @@ using namespace std;
 
 int main()
 {
+    /* ****** ESCRIBIR ********
     cout << "Parcial1" << endl;
     ofstream prueba; // Para escribir en él.
     prueba.open("prueba.txt",ios::app); //Modo agregar
@@ -18,24 +19,51 @@ int main()
         prueba<<cadena1[i];
     }
     prueba.close();
-    ifstream archivo("prueba.txt");
+
+    2536101,DescubriendoLaFisica,4,5,3
+    */
+    ifstream archivo("pensum.txt");
         if (archivo.is_open()) {
-            char contenido[100];
+            char texto[100],codigo[8],NameM[25],HP[3],HI[3],C[3];
             int pos=0;
-            while (archivo.good()) { //sin problemas de escritura, lectura, logica, etc.
-                contenido[pos] = archivo.get();
-                if (contenido[pos] != EOF) {
+            bool ok=true;
+            while (archivo.good() and ok==true) { //sin problemas de escritura, lectura, logica, etc.
+                texto[pos] = archivo.get();
+                if (texto[pos] == '\n'){
+                    for (int k=0;k<10;k++){
+                        if (texto[pos] == '\0') {
+                            break;
+                        }
+                        if (texto[k]!=','){
+                            codigo[k]=texto[k];
+                        }
+                        else{
+                            codigo[k] = '\0';
+                            k++;
+                            for (int i=0;i<25;i++){
+                                if (texto[k]!=','){
+                                    NameM[i]=texto[k];
+                                    k++;
+                                }
+                                NameM[i+1] = '\0';
+                            }
+                            k=10;
+                            ok=false;
+                        }
+                    }
+                }
+                if (texto[pos] != EOF) {
                     pos++;
                 }
-                if (pos >= 100 - 1) {
-                    break;
-                }
             }
-            contenido[pos] = '\0';
-            cout << contenido <<endl;
+            texto[pos] = '\0';
+            cout << texto <<endl;
+            cout <<"Codigo: " << codigo<<endl;
+            cout <<"Nombre Materia: " <<NameM<< endl;;
             archivo.close();
-        } else {
+            } else {
             cout << "No se pudo abrir el archivo" <<endl;
         }
+
     return 0;
 }
