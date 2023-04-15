@@ -16,7 +16,6 @@ int main()
             break;
         }
         prueba<<cadena1[i];
-
     }
     prueba.close();
     ifstream archivo("prueba.txt");
@@ -38,6 +37,5 @@ int main()
         } else {
             cout << "No se pudo abrir el archivo" <<endl;
         }
-
     return 0;
 }
