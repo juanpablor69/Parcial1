@@ -4,8 +4,13 @@
 using namespace std;
 
 void leerPensum(char texto[]);
+void Matricular(char NameM[],char codigo[],char HI[],char HP[],char C[]);
 int ExtCodigo (char codigo[],char texto[],int k);
-void extNombre(int k, char texto[], char NameM[]);
+int extNombre(int k, char texto[], char NameM[]);
+int HProf(int k,char texto[],char HP[]);
+int HIndep(int k,char texto[],char HI[]);
+int extCreditos(int k,char texto[],char C[]);
+int todo(int k,char texto[],char codigo[],char NameM[],char HI[],char HP[],char C[]);
 
 int main()
 {
@@ -22,7 +27,7 @@ int main()
         cin >> opcion;
 
         switch (opcion) {
-        case 0: // SALIDA
+        case 0: // SALIR
         {
             cout << "Hasta luego"<<endl;
             opcion=0;
@@ -38,15 +43,25 @@ int main()
             break;
         case 2: // MATRICULAR
         {
-            char texto[250];
+            system("cls");
+            char texto[300];
             leerPensum(texto);
-            cout << "OFERTA DE MATERIAS.\n A CADA UNA PRESIONA (1) PARA MATRICULAR Y (2) PARA NO MATRICULAR"<<endl;
-            char codigo[8],NameM[25];
-            int k=0;
-            k=ExtCodigo(codigo,texto,k);
-            extNombre(k,texto,NameM);
-            cout << "Deseas Matricular..."<<endl;
-            cout << NameM<<endl;
+            cout << "OFERTA DE MATERIAS."<<endl;
+            cout << "Aparecera una a una cada materia que puedes matricular."<<endl;
+            char codigo[8],NameM[25],HI[2],HP[2],C[2];
+            for (int k=0;k<226;k++){
+                int mat=0;
+                k=todo(k,texto,codigo,NameM,HI,HP,C);
+                cout << "\n****************************"<<endl;
+                cout << " ***** Nombre ***** Creditos"<<endl;
+                cout << NameM<<" * " <<C<< endl;
+                cout << "************" << k<< "****************"<<endl;
+                cout << "PRESIONA (1) PARA MATRICULAR Y (2) PARA NO MATRICULAR: ";
+                cin >> mat;
+                if (mat==1){
+                    Matricular(NameM,codigo,HI,HP,C);
+                }
+            }
         }
             break;
         }
@@ -54,6 +69,14 @@ int main()
     return 0;
 }
 
+int todo(int k,char texto[],char codigo[],char NameM[],char HI[],char HP[],char C[]){
+    k=ExtCodigo(codigo,texto,k);
+    k=extNombre(k,texto,NameM);
+    k=HProf(k,texto,HP);
+    k=HIndep(k,texto,HI);
+    k=extCreditos(k,texto,C);
+    return k;
+}
 void leerPensum(char texto[]){
     ifstream archivo("pensum.txt");
     if (archivo.is_open()) {
@@ -72,20 +95,20 @@ void leerPensum(char texto[]){
 }
 
 int ExtCodigo (char codigo[],char texto[],int k){
-    for (int i=k;i<100;i++){
+    for (int a=0;a<50;a++){
         if (texto[k]!=','){
-            codigo[k]=texto[k];
+            codigo[a]=texto[k];
             k++;
         }
         else{
-            codigo[k] = '\0';
+            codigo[a] = '\0';
             break;
         }
     }
     return k;
 }
 
-void extNombre(int k,char texto[],char NameM[]){
+int extNombre(int k,char texto[],char NameM[]){
     k++;
     for (int a=0;a<50;a++){
         if (texto[k]!=','){
@@ -97,18 +120,61 @@ void extNombre(int k,char texto[],char NameM[]){
             break;
         }
     }
+    return k;
 }
 
-void HIndep(int k,char texto[],int HI){
+int HProf(int k,char texto[],char HP[]){
+    k++;
     for (int a=0;a<50;a++){
         if (texto[k]!=','){
-            HI=texto[k];
+            HP[a]=texto[k];
             k++;
         }
         else{
+            HP[a] = '\0';
             break;
         }
     }
+    return k;
+}
+
+int HIndep(int k,char texto[],char HI[]){
+    k++;
+    for (int a=0;a<50;a++){
+        if (texto[k]!=','){
+            HI[a]=texto[k];
+            k++;
+        }
+        else{
+            HI[a] = '\0';
+            break;
+        }
+    }
+    return k;
+}
+
+int extCreditos(int k,char texto[],char C[]){
+    k++;
+    for (int a=0;a<50;a++){
+        if (texto[k]!=',' and texto[k]!='\n' and texto[k] != '\0'){
+            C[a]=texto[k];
+            k++;
+        }
+
+        else{
+            C[a] = '\0';
+            break;
+        }
+    }
+    return k;
+}
+
+void Matricular(char NameM[],char codigo[],char HI[],char HP[],char C[]){
+    ofstream Matricula; // Para escribir en él.
+    Matricula.open("Matricula.txt",ios::app); //Modo agregar
+    Matricula<<codigo<<','<<NameM<<','<<HP<<','<<HI<<','<<C<<endl;;
+
+    Matricula.close();
 }
 
 
