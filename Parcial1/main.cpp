@@ -4,21 +4,21 @@
 using namespace std;
 
 void leerPensum(char texto[]);
-void Matricular(char NameM[],char codigo[],char HI[],char HP[],char C[]);
 int ExtCodigo (char codigo[],char texto[],int k);
 int extNombre(int k, char texto[], char NameM[]);
 int HProf(int k,char texto[],char HP[]);
 int HIndep(int k,char texto[],char HI[]);
 int extCreditos(int k,char texto[],char C[]);
 int todo(int k,char texto[],char codigo[],char NameM[],char HI[],char HP[],char C[]);
-void RegHorario(char codigo[],char dia[],int hora);
 int leerMatri(char tex_mat[]);
+void Matricular(char NameM[],char codigo[],char HI[],char HP[],char C[]);
+void RegHorario(char codigo[],char dia[],int hora);
 int conv(char C[]);
+bool ComparaCadenas(char cadena1[],char cadena2[]);
 
 int main()
 {
     cout << "SISTEMA UNIVERSIDAD - PARCIAL 1 INFO II" << endl;
-
     int opcion=1,nmat=0,ncred=0;
     while (opcion!=0) {
         cout << "\n***************** MENU *****************" <<endl;
@@ -51,22 +51,50 @@ int main()
         case 2: // MATRICULAR
         {
             system("cls");
+            int mat=0;
+            bool matri;
             char texto[300],codigo[8],NameM[25],HI[2],HP[2],C[2];
+            char texto_[300],codigo_[8],NameM_[25],HI_[2],HP_[2],C_[2];
             leerPensum(texto);
             cout << "OFERTA DE MATERIAS."<<endl;
             cout << "Aparecera una a una cada materia que puedes matricular."<<endl;
-            for (int k=0;k<226;k++){
-                int mat=0;
-                k=todo(k,texto,codigo,NameM,HI,HP,C); //una materia matriculada
 
-                cout << "\n****************************"<<endl;
-                cout << " ***** Nombre ***** Creditos"<<endl;
-                cout << NameM<<" * " <<C<< endl;
-                cout << "******************************"<<endl;
-                cout << "PRESIONA (1) PARA MATRICULAR Y (2) PARA NO MATRICULAR: ";
-                cin >> mat;
-                if (mat==1){
-                    Matricular(NameM,codigo,HI,HP,C);
+            if (leerMatri(texto_)>0){
+                for (int k=0;k<226;k++){
+                    k=todo(k,texto,codigo,NameM,HI,HP,C);
+                    int max=leerMatri(texto_);
+                    matri=false;
+                    for (int m=0;m<max;m++){
+                        m=todo(m,texto_,codigo_,NameM_,HI_,HP_,C_);
+                        if (ComparaCadenas(codigo,codigo_)){
+                            matri=true;
+                        }
+                    }
+                    if (matri==false){
+                        cout << "\n****************************"<<endl;
+                        cout << " ***** Nombre ***** Creditos"<<endl;
+                        cout << NameM<<" * " <<C<< endl;
+                        cout << "******************************"<<endl;
+                        cout << "PRESIONA (1) PARA MATRICULAR Y (2) PARA NO MATRICULAR: ";
+                        cin >> mat;
+                        if (mat==1){
+                            Matricular(NameM,codigo,HI,HP,C);
+                        }
+                    }
+                }
+            }
+            else{
+                for (int k=0;k<226;k++){
+                    k=todo(k,texto,codigo,NameM,HI,HP,C); //una materia matriculada
+                    cout << "\n****************************"<<endl;
+                    cout << " ***** Nombre ***** Creditos"<<endl;
+                    cout << NameM<<" * " <<C<< endl;
+                    cout << "******************************"<<endl;
+                    cout << "PRESIONA (1) PARA MATRICULAR Y (2) PARA NO MATRICULAR: ";
+                    cin >> mat;
+                    if (mat==1){
+                        Matricular(NameM,codigo,HI,HP,C);
+                    }
                 }
             }
         }
@@ -131,15 +159,6 @@ int main()
 
     }
     return 0;
-}
-
-int todo(int k,char texto[],char codigo[],char NameM[],char HI[],char HP[],char C[]){
-    k=ExtCodigo(codigo,texto,k);
-    k=extNombre(k,texto,NameM);
-    k=HProf(k,texto,HP);
-    k=HIndep(k,texto,HI);
-    k=extCreditos(k,texto,C);
-    return k;
 }
 
 void leerPensum(char texto[]){
@@ -234,6 +253,15 @@ int extCreditos(int k,char texto[],char C[]){
     return k;
 }
 
+int todo(int k,char texto[],char codigo[],char NameM[],char HI[],char HP[],char C[]){
+    k=ExtCodigo(codigo,texto,k);
+    k=extNombre(k,texto,NameM);
+    k=HProf(k,texto,HP);
+    k=HIndep(k,texto,HI);
+    k=extCreditos(k,texto,C);
+    return k;
+}
+
 void Matricular(char NameM[],char codigo[],char HI[],char HP[],char C[]){
     ofstream Matricula; // Para escribir en él.
     Matricula.open("Matricula.txt",ios::app); //Modo agregar
@@ -254,7 +282,7 @@ int leerMatri(char tex_mat[]){
         tex_mat[pos] = '\0';
         archivo.close();
     }else {
-        cout << "Debes matricular al menos una materia." <<endl;
+        cout << "" <<endl;
     }
     return pos;
 }
@@ -272,4 +300,16 @@ int conv(char C[]){
         k=C[a]-48;
     }
     return k;
+}
+
+bool ComparaCadenas(char cadena1[],char cadena2[]){
+    for(int i=0;i<=20;i++){
+        if (cadena1[i]!=cadena2[i]){
+            return false;
+        }
+        if(cadena1[i] == '\0' or cadena2[i] == '\0') {
+            break;
+        }
+    }
+    return true;
 }
