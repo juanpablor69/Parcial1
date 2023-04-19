@@ -13,10 +13,11 @@ int todo(int k,char texto[],char codigo[],char NameM[],char HI[],char HP[],char 
 int leerMatri(char tex_mat[]);
 void Matricular(char NameM[],char codigo[],char HI[],char HP[],char C[]);
 int leerHorario(char tex_hor[]);
-void extHorario(char tex_hor[],char codigo[],char hora[],char diaL[]);
-void RegHorario(char codigo[],char dia[],int hora);
+int extHora(int k,char texto[],char C[]);
+void RegHorario(char codigo[],char dia[],char hora[]);
 int conv(char C[]);
 bool ComparaCadenas(char cadena1[],char cadena2[]);
+void ConvertirMay(char cadena[]);
 
 int main()
 {
@@ -106,38 +107,81 @@ int main()
         {
             system("cls");
             char tex_mat[250];
-            cout << "*** MATERIAS MATRICULADAS ***"<<endl;
-            leerMatri(tex_mat);
-            cout << tex_mat <<endl;
+            int max=leerMatri(tex_mat);
+            if (max>0){
+                cout << "*** MATERIAS MATRICULADAS ***"<<endl;
+                cout << tex_mat <<endl;
+            }else{
+                cout<<"No hay materias matriculadas."<<endl;
+            }
+
         }
             break;
         case 4: //REGISTRAR HORARIO
         {
             system("cls");
             char texmat[200],registrar[8];
-            int hora,max;
+            int max,cont_h=0,htotal,hfaltan;
             max=leerMatri(texmat);
-            cout << "MATERIAS MATRICULADAS: "<<endl;
-            cout <<texmat<<endl;
-            cout <<"\nIngresa el codigo de la materia que quieres matricular: ";
-            cin >> registrar;
-            for (int k=0;k<max;k++){
-                char codigo[8],NameM[25],HI[2],HP[2],C[2],dia[2];
-                k=todo(k,texmat,codigo,NameM,HI,HP,C); //
-                if (ComparaCadenas(codigo,registrar)){
-                    char tex_hor[100],codigo_[8],diaL[2];
-                    cout << "Registrando horario para " << NameM <<endl;
-
-                    cout << "Dia: ";
-                    cin >> dia;
-                    cout << "Hora: ";
-                    cin >> hora;
-                    RegHorario(codigo,dia,hora);
-                    reghorario=true;
+            if (max>0){
+                cout << "MATERIAS MATRICULADAS: "<<endl;
+                cout <<texmat<<endl;
+                cout <<"\nIngresa el codigo de la materia para registrar horario: ";
+                cin >> registrar;
+                for (int k=0;k<max;k++){ // -- analizando matricula
+                    char codigo[8],NameM[25],HI[2],HP[2],C[2];
+                    k=todo(k,texmat,codigo,NameM,HI,HP,C); //
+                    if (ComparaCadenas(codigo,registrar)){
+                        char tex_hor[100];
+                        cout << "\nRegistrando horario para " << NameM <<endl;
+                        int max_=leerHorario(tex_hor);
+                        for (int i=0;i<max_;i++){ // -- ANALIZANDO HORARIO PARA IMPRIMIR RESUMEN
+                            char codigo_[8],hora_[2],diaL_[2];
+                            i=ExtCodigo(codigo_,tex_hor,i);
+                            i=extHora(i,tex_hor,diaL_);//dia
+                            i=extCreditos(i,tex_hor,hora_);
+                            if (ComparaCadenas(codigo,codigo_)){
+                                cont_h++;
+                            }
+                        }
+                        htotal=conv(HP)+conv(HI);
+                        hfaltan=htotal - cont_h;
+                        cout <<"Tienes " <<cont_h<<" horas registradas de esta materia."<<endl;
+                        cout<<"Te quedan " <<hfaltan <<" horas por registrar."<<endl;;
+                        char dia[2],hora[2];
+                        if (hfaltan>0){
+                            cout<<"\nREGISTRAR HORA UNICA"<<endl;
+                            cout<<"OJO: Dia sera una letra en mayuscula. Hora sera una hora entre 8 y 21 (hora militar)."<<endl;
+                            cout << "Dia: ";
+                            cin >> dia;
+                            ConvertirMay(dia);
+                            cout << "Hora: ";
+                            cin >> hora;
+                            bool ok=true;
+                            for (int i=0;i<max_;i++){ // -- analiza horario y verifica hora.
+                                char codigo_[8],hora_[2],diaL_[2];
+                                i=ExtCodigo(codigo_,tex_hor,i);
+                                i=extHora(i,tex_hor,diaL_);//DIA
+                                i=extCreditos(i,tex_hor,hora_); //hora
+                                if (ComparaCadenas(dia,diaL_) and ComparaCadenas(hora,hora_)){ //dia
+                                    ok=false;
+                                }
+                            }
+                            if (ok){
+                                cout<<"REGISTRADO!!"<<endl;
+                                RegHorario(codigo,dia,hora);
+                            }else{
+                                cout<<"ERROR: Ya existe un registro a esta hora."<<endl;
+                            }
+                        }else{
+                            cout<<"No puedes registrar mas horas para esta materia."<<endl;
+                        }
+                    }
                 }
             }
-
-
+            else{
+                cout << "Debes matricular primero."<<endl;
+            }
         }
             break;
         case 5: //SUGERIR HORARIO
@@ -145,8 +189,8 @@ int main()
             system("cls");
             char texmat[200];
             int max,nHI=0,nHP=0;
-            if(reghorario){
-                max=leerMatri(texmat);
+            max=leerMatri(texmat);
+            if(max>0){
                 for (int k=0;k<max;k++){
                     char codigo[8],NameM[25],HI[2],HP[2],C[2];
                     k=todo(k,texmat,codigo,NameM,HI,HP,C);
@@ -163,7 +207,7 @@ int main()
                 cout << "Tomando en cuenta que estudiaras, por dia, 7 horas en semana y 4 los sabados... (39h/semana"<<endl;
                 cout << "Te quedan " <<39-(nHP+nHI)<<" horas libres por semana."<<endl;
             }else{
-                cout << "Para una mayor efectividad, debes registrar horario primero"<<endl;
+                cout << "Para una mayor efectividad, debes matricular primero."<<endl;
             }
 
 
@@ -271,6 +315,22 @@ int extCreditos(int k,char texto[],char C[]){
     return k;
 }
 
+int extHora(int k,char texto[],char C[]){
+    k++;
+    for (int a=0;a<50;a++){
+        if (texto[k]!=','){
+            C[a]=texto[k];
+            k++;
+        }
+
+        else{
+            C[a] = '\0';
+            break;
+        }
+    }
+    return k;
+}
+
 int todo(int k,char texto[],char codigo[],char NameM[],char HI[],char HP[],char C[]){
     k=ExtCodigo(codigo,texto,k);
     k=extNombre(k,texto,NameM);
@@ -305,10 +365,10 @@ int leerMatri(char tex_mat[]){
     return pos;
 }
 
-void RegHorario(char codigo[],char dia[],int hora){
+void RegHorario(char codigo[],char dia[],char hora[]){
     ofstream Horario; // Para escribir en él.
     Horario.open("Horario.txt",ios::app); //Modo agregar
-    Horario<<codigo<<','<<hora<<','<<dia<<endl;
+    Horario<<codigo<<','<<dia<<','<<hora<<endl;
     Horario.close();
 }
 
@@ -325,46 +385,9 @@ int leerHorario(char tex_hor[]){
         tex_hor[pos] = '\0';
         archivo.close();
     }else {
-        cout << "No se pudo abrir el archivo." <<endl;
+        cout << "" <<endl;
     }
     return pos;
-}
-
-void extHorario(char tex_hor[],char codigo[],char hora[],char diaL[]){
-    int k=0;
-    for (int a=0;a<8;a++){
-        if (tex_hor[k]!=','){
-            codigo[a]=tex_hor[k];
-            k++;
-        }
-        else{
-            codigo[a] = '\0';
-            break;
-        }
-    }
-    k++;
-    for (int a=0;a<2;a++){
-        if (tex_hor[k]!=','){
-            hora[a]=tex_hor[k];
-            k++;
-        }
-        else{
-            hora[a] = '\0';
-            break;
-        }
-    }
-    k++;
-    for (int a=0;a<2;a++){
-        if (tex_hor[k]!=','){
-            diaL[a]=tex_hor[k];
-            k++;
-        }
-        else{
-            diaL[a] = '\0';
-            break;
-        }
-    }
-
 }
 
 int conv(char C[]){
@@ -385,4 +408,15 @@ bool ComparaCadenas(char cadena1[],char cadena2[]){
         }
     }
     return true;
+}
+
+void ConvertirMay(char cadena[]) {
+    for (int i = 0; i <= 30; i++) {
+        if (cadena[i] == '\0') {
+            break;
+        }
+        else if (cadena[i] > 96 and cadena[i] < 123) {
+            cadena[i] -= 32;
+        }
+    }
 }
