@@ -12,6 +12,8 @@ int extCreditos(int k,char texto[],char C[]);
 int todo(int k,char texto[],char codigo[],char NameM[],char HI[],char HP[],char C[]);
 int leerMatri(char tex_mat[]);
 void Matricular(char NameM[],char codigo[],char HI[],char HP[],char C[]);
+int leerHorario(char tex_hor[]);
+void extHorario(char tex_hor[],char codigo[],char hora[],char diaL[]);
 void RegHorario(char codigo[],char dia[],int hora);
 int conv(char C[]);
 bool ComparaCadenas(char cadena1[],char cadena2[]);
@@ -20,6 +22,7 @@ int main()
 {
     cout << "SISTEMA UNIVERSIDAD - PARCIAL 1 INFO II" << endl;
     int opcion=1,nmat=0,ncred=0;
+    bool reghorario=false;
     while (opcion!=0) {
         cout << "\n***************** MENU *****************" <<endl;
         cout << "1. VER PENSUM." <<endl;
@@ -111,43 +114,58 @@ int main()
         case 4: //REGISTRAR HORARIO
         {
             system("cls");
-            char texmat[200];
+            char texmat[200],registrar[8];
             int hora,max;
             max=leerMatri(texmat);
+            cout << "MATERIAS MATRICULADAS: "<<endl;
+            cout <<texmat<<endl;
+            cout <<"\nIngresa el codigo de la materia que quieres matricular: ";
+            cin >> registrar;
             for (int k=0;k<max;k++){
                 char codigo[8],NameM[25],HI[2],HP[2],C[2],dia[2];
-                k=todo(k,texmat,codigo,NameM,HI,HP,C);
-                cout << codigo << " ---- "<<NameM<<endl;
-                cout << "Dia: ";
-                cin >> dia;
-                cout << "Hora: ";
-                cin >> hora;
-                ncred=ncred+conv(C);
-                RegHorario(codigo,dia,hora);
+                k=todo(k,texmat,codigo,NameM,HI,HP,C); //
+                if (ComparaCadenas(codigo,registrar)){
+                    char tex_hor[100],codigo_[8],diaL[2];
+                    cout << "Registrando horario para " << NameM <<endl;
+
+                    cout << "Dia: ";
+                    cin >> dia;
+                    cout << "Hora: ";
+                    cin >> hora;
+                    RegHorario(codigo,dia,hora);
+                    reghorario=true;
+                }
             }
+
+
         }
             break;
         case 5: //SUGERIR HORARIO
         {
             system("cls");
             char texmat[200];
-            int max,ncred=0,nHI=0,nHP=0;
-            max=leerMatri(texmat);
-            for (int k=0;k<max;k++){
-                char codigo[8],NameM[25],HI[2],HP[2],C[2];
-                k=todo(k,texmat,codigo,NameM,HI,HP,C);
-                nHI=nHI+conv(HI);
-                nHP=nHP+conv(HP);
-                ncred=ncred+conv(C);
-                nmat++;
+            int max,nHI=0,nHP=0;
+            if(reghorario){
+                max=leerMatri(texmat);
+                for (int k=0;k<max;k++){
+                    char codigo[8],NameM[25],HI[2],HP[2],C[2];
+                    k=todo(k,texmat,codigo,NameM,HI,HP,C);
+                    nHI=nHI+conv(HI);
+                    nHP=nHP+conv(HP);
+                    ncred=ncred+conv(C);
+                    nmat++;
+                }
+                cout << "Tienes " << nmat << " materias matriculadas."<<endl;
+                cout << "Equivalentes a " << ncred << " creditos."<<endl;
+                cout << "Tienes que estudiar, en total, " << (nHP+nHI)*16 << " horas este semestre. ("<<nHP+nHI<<"/semana)"<<endl;
+                cout << "De esas, "<< nHP*16 << " son horas de trabajo asistidas por el profesor. (" <<nHP<<"/semana)"<<endl;
+                cout << "Es decir, debes estudiar "<<nHI*16<<" horas por tu cuenta por semana. ("<<nHI<<"/semana)"<<endl;
+                cout << "Tomando en cuenta que estudiaras, por dia, 7 horas en semana y 4 los sabados... (39h/semana"<<endl;
+                cout << "Te quedan " <<39-(nHP+nHI)<<" horas libres por semana."<<endl;
+            }else{
+                cout << "Para una mayor efectividad, debes registrar horario primero"<<endl;
             }
-            cout << "Tienes " << nmat << " materias matriculadas."<<endl;
-            cout << "Equivalentes a " << ncred << " creditos."<<endl;
-            cout << "Tienes que estudiar, en total, " << (nHP+nHI)*16 << " horas este semestre. ("<<nHP+nHI<<"/semana)"<<endl;
-            cout << "De esas, "<< nHP*16 << " son horas de trabajo asistidas por el profesor. (" <<nHP<<"/semana)"<<endl;
-            cout << "Es decir, debes estudiar "<<nHI*16<<" horas por tu cuenta por semana. ("<<nHI<<"/semana)"<<endl;
-            cout << "Tomando en cuenta que estudiaras,por dia, 7 horas en semana y 4 los sabados... (39h/semana"<<endl;
-            cout << "Te quedan " <<39-(nHP+nHI)<<" horas libres por semana."<<endl;
+
 
         }
             break;
@@ -290,8 +308,63 @@ int leerMatri(char tex_mat[]){
 void RegHorario(char codigo[],char dia[],int hora){
     ofstream Horario; // Para escribir en él.
     Horario.open("Horario.txt",ios::app); //Modo agregar
-    Horario<<codigo<<','<<dia<<','<<hora<<endl;
+    Horario<<codigo<<','<<hora<<','<<dia<<endl;
     Horario.close();
+}
+
+int leerHorario(char tex_hor[]){
+    ifstream archivo("Horario.txt");
+    int pos=0;
+    if (archivo.is_open()) {
+        while (archivo.good()) { //sin problemas de escritura, lectura, logica, etc.
+            tex_hor[pos] = archivo.get();
+            if (tex_hor[pos] != EOF) {
+                pos++;
+            }
+        }
+        tex_hor[pos] = '\0';
+        archivo.close();
+    }else {
+        cout << "No se pudo abrir el archivo." <<endl;
+    }
+    return pos;
+}
+
+void extHorario(char tex_hor[],char codigo[],char hora[],char diaL[]){
+    int k=0;
+    for (int a=0;a<8;a++){
+        if (tex_hor[k]!=','){
+            codigo[a]=tex_hor[k];
+            k++;
+        }
+        else{
+            codigo[a] = '\0';
+            break;
+        }
+    }
+    k++;
+    for (int a=0;a<2;a++){
+        if (tex_hor[k]!=','){
+            hora[a]=tex_hor[k];
+            k++;
+        }
+        else{
+            hora[a] = '\0';
+            break;
+        }
+    }
+    k++;
+    for (int a=0;a<2;a++){
+        if (tex_hor[k]!=','){
+            diaL[a]=tex_hor[k];
+            k++;
+        }
+        else{
+            diaL[a] = '\0';
+            break;
+        }
+    }
+
 }
 
 int conv(char C[]){
