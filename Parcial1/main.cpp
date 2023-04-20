@@ -46,7 +46,7 @@ int main()
         case 1: // LEER PENSUM
         {
             system("cls");
-            char texto[250];
+            char texto[1200];
             cout << "*** MATERIAS PRIMER SEMESTRE ***"<<endl;
             leerPensum(texto);
             cout << texto <<endl;
@@ -55,49 +55,45 @@ int main()
         case 2: // MATRICULAR
         {
             system("cls");
-            int mat=0;
-            bool matri;
-            char texto[300],codigo[8],NameM[25],HI[2],HP[2],C[2];
-            char texto_[300],codigo_[8],NameM_[25],HI_[2],HP_[2],C_[2];
+            bool ok=true;
+            char texto[1200],codigo[8],NameM[25],HI[2],HP[2],C[2];
+            char texto_[600];//,codigo_[8],NameM_[25],HI_[2],HP_[2],C_[2];
+            char mat[8];
             leerPensum(texto);
             cout << "OFERTA DE MATERIAS."<<endl;
-            cout << "Aparecera una a una cada materia que puedes matricular."<<endl;
-
-            if (leerMatri(texto_)>0){
-                for (int k=0;k<226;k++){
+            cout<<texto<<endl;
+            if (leerMatri(texto_)>0){ //analiza pensum
+                cout << "\nEscribe el codigo de la materia que quieres matricular: ";
+                cin >> mat;
+                for (int k=0;k<1200;k++){
                     k=todo(k,texto,codigo,NameM,HI,HP,C);
-                    int max=leerMatri(texto_);
-                    matri=false;
-                    for (int m=0;m<max;m++){
-                        m=todo(m,texto_,codigo_,NameM_,HI_,HP_,C_);
-                        if (ComparaCadenas(codigo,codigo_)){
-                            matri=true;
+                    if(ComparaCadenas(mat,codigo)){
+                        //buscando si se repite
+                        for (int i=0;i<leerMatri(texto_);i++){
+                            char codigo_[8],NameM_[25],HI_[2],HP_[2],C_[2];
+                            i=todo(i,texto_,codigo_,NameM_,HI_,HP_,C_);
+                            if (ComparaCadenas(codigo,codigo_)){
+                                ok=false;
+                            }
                         }
-                    }
-                    if (matri==false){
-                        cout << "\n****************************"<<endl;
-                        cout << " ***** Nombre ***** Creditos"<<endl;
-                        cout << NameM<<" * " <<C<< endl;
-                        cout << "******************************"<<endl;
-                        cout << "PRESIONA (1) PARA MATRICULAR Y (2) PARA NO MATRICULAR: ";
-                        cin >> mat;
-                        if (mat==1){
+                        if(ok){
                             Matricular(NameM,codigo,HI,HP,C);
+                            break;
+                        }else{
+                            cout<<"ERROR!: " << NameM<<" ya está matriculada."<<endl;
                         }
                     }
                 }
             }
             else{
-                for (int k=0;k<226;k++){
+                cout << "Escribe el codigo de la materia que quieres matricular: ";
+                cin >> mat;
+                for (int k=0;k<1200;k++){
                     k=todo(k,texto,codigo,NameM,HI,HP,C); //una materia matriculada
-                    cout << "\n****************************"<<endl;
-                    cout << " ***** Nombre ***** Creditos"<<endl;
-                    cout << NameM<<" * " <<C<< endl;
-                    cout << "******************************"<<endl;
-                    cout << "PRESIONA (1) PARA MATRICULAR Y (2) PARA NO MATRICULAR: ";
-                    cin >> mat;
-                    if (mat==1){
+                    if(ComparaCadenas(mat,codigo)){
+                        cout <<"Has matriculado exitosamente: "<<NameM<<"."<<endl;
                         Matricular(NameM,codigo,HI,HP,C);
+                        break;
                     }
                 }
             }
@@ -339,6 +335,7 @@ int todo(int k,char texto[],char codigo[],char NameM[],char HI[],char HP[],char 
     k=extCreditos(k,texto,C);
     return k;
 }
+
 
 void Matricular(char NameM[],char codigo[],char HI[],char HP[],char C[]){
     ofstream Matricula; // Para escribir en él.
