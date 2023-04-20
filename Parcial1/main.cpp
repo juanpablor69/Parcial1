@@ -55,7 +55,7 @@ int main()
         case 2: // MATRICULAR
         {
             system("cls");
-            bool ok=true;
+            bool ok=true,existe=false;
             char texto[1200],codigo[8],NameM[25],HI[2],HP[2],C[2];
             char texto_[600];//,codigo_[8],NameM_[25],HI_[2],HP_[2],C_[2];
             char mat[8];
@@ -65,10 +65,11 @@ int main()
             if (leerMatri(texto_)>0){ //analiza pensum
                 cout << "\nEscribe el codigo de la materia que quieres matricular: ";
                 cin >> mat;
-                for (int k=0;k<1200;k++){
+                for (int k=0;k<1850;k++){
                     k=todo(k,texto,codigo,NameM,HI,HP,C);
                     if(ComparaCadenas(mat,codigo)){
                         //buscando si se repite
+                        existe=true;
                         for (int i=0;i<leerMatri(texto_);i++){
                             char codigo_[8],NameM_[25],HI_[2],HP_[2],C_[2];
                             i=todo(i,texto_,codigo_,NameM_,HI_,HP_,C_);
@@ -77,24 +78,32 @@ int main()
                             }
                         }
                         if(ok){
+                            cout <<"Has matriculado exitosamente: "<<NameM<<"."<<endl;
                             Matricular(NameM,codigo,HI,HP,C);
                             break;
                         }else{
-                            cout<<"ERROR!: " << NameM<<" ya está matriculada."<<endl;
+                            cout<<"ERROR!: " << NameM<<" ya esta matriculada."<<endl;
                         }
                     }
+                }
+                if(!existe){
+                    cout<<"\nEl codigo que ingresaste no se encontro."<<endl;
                 }
             }
             else{
                 cout << "Escribe el codigo de la materia que quieres matricular: ";
                 cin >> mat;
-                for (int k=0;k<1200;k++){
+                for (int k=0;k<1800;k++){
                     k=todo(k,texto,codigo,NameM,HI,HP,C); //una materia matriculada
                     if(ComparaCadenas(mat,codigo)){
+                        existe=true;
                         cout <<"Has matriculado exitosamente: "<<NameM<<"."<<endl;
                         Matricular(NameM,codigo,HI,HP,C);
                         break;
                     }
+                }
+                if(!existe){
+                    cout<<"\nEl codigo que ingresaste no se encontro."<<endl;
                 }
             }
         }
@@ -117,7 +126,7 @@ int main()
         {
             system("cls");
             char texmat[200],registrar[8];
-            int max,cont_h=0,htotal,hfaltan;
+            int max,cont_h=0,htotal,hfaltan,hora_;
             max=leerMatri(texmat);
             if (max>0){
                 cout << "MATERIAS MATRICULADAS: "<<endl;
@@ -142,7 +151,7 @@ int main()
                         }
                         htotal=conv(HP)+conv(HI);
                         hfaltan=htotal - cont_h;
-                        cout <<"Tienes " <<cont_h<<" horas registradas de esta materia."<<endl;
+                        cout <<"Tienes " <<cont_h<<" hora(s) registradas de esta materia."<<endl;
                         cout<<"Te quedan " <<hfaltan <<" horas por registrar."<<endl;;
                         char dia[2],hora[2];
                         if (hfaltan>0){
@@ -153,22 +162,28 @@ int main()
                             ConvertirMay(dia);
                             cout << "Hora: ";
                             cin >> hora;
-                            bool ok=true;
-                            for (int i=0;i<max_;i++){ // -- analiza horario y verifica hora.
-                                char codigo_[8],hora_[2],diaL_[2];
-                                i=ExtCodigo(codigo_,tex_hor,i);
-                                i=extHora(i,tex_hor,diaL_);//DIA
-                                i=extCreditos(i,tex_hor,hora_); //hora
-                                if (ComparaCadenas(dia,diaL_) and ComparaCadenas(hora,hora_)){ //dia
-                                    ok=false;
+                            hora_=conv(hora);
+                            if (hora_<8 or hora_>21){
+                                cout<<"No duerme??"<<endl;
+                            }else{
+                                bool ok=true;
+                                for (int i=0;i<max_;i++){ // -- analiza horario y verifica hora.
+                                    char codigo_[8],hora_[2],diaL_[2];
+                                    i=ExtCodigo(codigo_,tex_hor,i);
+                                    i=extHora(i,tex_hor,diaL_);//DIA
+                                    i=extCreditos(i,tex_hor,hora_); //hora
+                                    if (ComparaCadenas(dia,diaL_) and ComparaCadenas(hora,hora_)){ //dia
+                                        ok=false;
+                                    }
+                                }
+                                if (ok){
+                                    cout<<"REGISTRADO!!"<<endl;
+                                    RegHorario(codigo,dia,hora);
+                                }else{
+                                    cout<<"ERROR: Ya existe un registro a esta hora."<<endl;
                                 }
                             }
-                            if (ok){
-                                cout<<"REGISTRADO!!"<<endl;
-                                RegHorario(codigo,dia,hora);
-                            }else{
-                                cout<<"ERROR: Ya existe un registro a esta hora."<<endl;
-                            }
+
                         }else{
                             cout<<"No puedes registrar mas horas para esta materia."<<endl;
                         }
@@ -183,8 +198,8 @@ int main()
         case 5: //SUGERIR HORARIO
         {
             system("cls");
-            char texmat[200];
-            int max,nHI=0,nHP=0;
+            char texmat[200],tex_hor[150];
+            int max,nHI=0,nHP=0,nmat=0,ncred=0;
             max=leerMatri(texmat);
             if(max>0){
                 for (int k=0;k<max;k++){
@@ -195,13 +210,75 @@ int main()
                     ncred=ncred+conv(C);
                     nmat++;
                 }
+                cout << "------------------- SEGUN TUS MATERIAS: ----------------------"<<endl;
                 cout << "Tienes " << nmat << " materias matriculadas."<<endl;
                 cout << "Equivalentes a " << ncred << " creditos."<<endl;
                 cout << "Tienes que estudiar, en total, " << (nHP+nHI)*16 << " horas este semestre. ("<<nHP+nHI<<"/semana)"<<endl;
                 cout << "De esas, "<< nHP*16 << " son horas de trabajo asistidas por el profesor. (" <<nHP<<"/semana)"<<endl;
-                cout << "Es decir, debes estudiar "<<nHI*16<<" horas por tu cuenta por semana. ("<<nHI<<"/semana)"<<endl;
+                cout << "Es decir, debes estudiar "<<nHI*16<<" horas por tu cuenta este semestre. ("<<nHI<<"/semana)"<<endl;
                 cout << "Tomando en cuenta que estudiaras, por dia, 7 horas en semana y 4 los sabados... (39h/semana"<<endl;
-                cout << "Te quedan " <<39-(nHP+nHI)<<" horas libres por semana."<<endl;
+                cout << "Podrias matricular otras " <<39-(nHP+nHI)<<" horas por semana. (horas para matricular mas materias)"<<endl;
+
+                cout << "\n------------------------------------------------------------"<<endl;
+                cout << "----------------------- SEGUN TU HORARIO: --------------------"<<endl;
+                int hora,dia_;
+                char n[15]="-----------",mat[20],dia;
+                char ***Horario = new char**[15]; // crear arreglo de punteros a punteros a caracteres
+
+                for (int i = 0; i < 15; i++) {
+                    Horario[i] = new char*[7]; // crear arreglo de punteros a caracteres para cada hora
+                    for (int j = 0; j < 6; j++) {
+                        Horario[i][j] = new char[25]; // crear arreglo de caracteres para cada
+                        Horario[i][j]=n; // copiar la cadena en la celda de la matriz
+                    }
+                }
+
+                for (int i=0;i<leerHorario(tex_hor);i++){ // -- analiza horario y verifica hora.
+                    char codigo_[8],hora_[1],diaL_[1];
+                    int dia_,hora1;
+                    i=ExtCodigo(codigo_,tex_hor,i);
+                    i=extHora(i,tex_hor,diaL_);//DIA
+                    i=extCreditos(i,tex_hor,hora_); //hora
+                    if(diaL_[0]=='L'){
+                        dia_=0;
+                    }else if(diaL_[0]=='M'){
+                        dia_=1;
+                    }else if(diaL_[0]=='W'){
+                        dia_=2;
+                    }else if(diaL_[0]=='J'){
+                        dia_=3;
+                    }else if(diaL_[0]=='V'){
+                        dia_=4;
+                    }else if(diaL_[0]=='S'){
+                        dia_=5;
+                    }
+                    hora1=conv(hora_);
+                    hora1-=8;
+                    for (int j=0;j<15;j++){
+                        for (int k=0;k<6;k++){
+                            if (k==dia_ and j==hora1){
+                                cout<<"entro"<<endl;
+                                Horario[j][k]=codigo_;
+                            }
+                        }
+                    }
+                }
+
+                cout<<  "     Lunes       Martes      Miercoles        Jueves      Viernes      Sabado"<<endl;
+                for (int i=0;i<14;i++){
+                    cout << i+8 << "h";
+                    for (int k=0;k<6;k++){
+                        cout << " " << Horario[i][k] << " ";
+                    }
+                    cout << endl;
+                }
+                delete[] Horario;
+                Horario = nullptr;
+
+
+
+
+
             }else{
                 cout << "Para una mayor efectividad, debes matricular primero."<<endl;
             }
